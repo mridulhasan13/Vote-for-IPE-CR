@@ -58,14 +58,17 @@ That's it! You can host the `index.html` file on [GitHub Pages](https://pages.gi
 
 ---
 
-## 🔐 Your Admin Keys
+## 🔐 Getting Admin Access
 
-Since your database is completely locked down to prevent cheating, you need an admin account to start adding candidates. Thanks to the setup script you ran earlier, one is already waiting for you:
+Since your database is completely locked down to prevent cheating, you need an admin account to start adding candidates. 
 
-- **Student ID:** `ADMIN_MASTER`
-- **Email:** `admin@ipevote.com`
+Instead of leaving hardcoded admin keys exposed to the world, the safest way is to grant yourself access directly from your database:
 
-*Just log in with those credentials, click the newly revealed **Admin Panel** tab, and you're officially in control of the election.*
+1. Open your newly hosted portal and register a normal account with your own details.
+2. Head over to your Supabase project dashboard and open the **Table Editor**.
+3. Select the `students` table, find the row with your name, and manually change both `approved` and `is_admin` to `TRUE`.
+
+*Just log in with your newly upgraded credentials, click the **Admin Panel** tab, and you're officially in control of the election.*
 
 ---
 
