@@ -1,0 +1,2217 @@
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CR Voting</title>
+  <link rel="icon" type="image/png" href="classvote_logo_professional_1776538002928.png">
+<style>
+:root {
+  /* Editorial Elite Palette */
+  --primary: hsl(230, 85%, 58%);
+  --primary-glow: hsla(230, 85%, 58%, 0.15);
+  --primary-hover: hsl(230, 85%, 50%);
+  
+  --bg-base: hsl(220, 20%, 97%);
+  --bg-card: hsl(0, 0%, 100%);
+  --bg-glass: hsla(0, 0%, 100%, 0.7);
+  
+  --slate-900: hsl(215, 30%, 12%);
+  --slate-600: hsl(215, 15%, 45%);
+  --slate-200: hsl(215, 20%, 90%);
+  --slate-100: hsl(215, 20%, 95%);
+  
+  --text-primary: var(--slate-900);
+  --text-secondary: var(--slate-600);
+  
+  --accent-success: hsl(155, 100%, 30%);
+  --accent-success-soft: hsl(155, 100%, 97%);
+  --accent-error: hsl(0, 85%, 60%);
+  --accent-error-soft: hsl(0, 85%, 98%);
+  
+  /* Geometric Tokens */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  
+  --shadow-elite: 0 1px 2px rgba(0,0,0,0.06), 0 4px 6px -1px rgba(0,0,0,0.04), 0 20px 25px -5px rgba(0,0,0,0.03);
+  --shadow-focus: 0 0 0 4px var(--primary-glow);
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --font-heading: 'Outfit', var(--font-sans);
+  --shadow-elite: 0 10px 30px -10px rgba(0,0,0,0.5);
+  
+  /* Dashboard Layout Tokens */
+  --sidebar-w: 280px;
+  --sidebar-w-collapsed: 80px;
+}
+
+[data-theme="dark"] {
+  --bg-base: hsl(220, 30%, 6%);
+  --bg-card: hsl(220, 30%, 10%);
+  --bg-glass: hsla(220, 30%, 6%, 0.8);
+  
+  --slate-900: hsl(220, 10%, 95%);
+  --slate-600: hsl(220, 10%, 75%);
+  --slate-200: hsl(220, 20%, 18%);
+  --slate-100: hsl(220, 20%, 12%);
+  
+  --shadow-elite: 0 10px 30px -10px rgba(0,0,0,0.5);
+}
+
+/* Dashboard Structural Container */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-layout { grid-template-columns: 1fr; }
+}
+
+/* Sidebar Styling */
+.sidebar {
+  background: var(--bg-card);
+  border-right: 1px solid var(--slate-200);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 1001;
+}
+
+@media (max-width: 1024px) {
+  .sidebar { 
+    position: fixed; 
+    bottom: 0; left: 0; right: 0; top: auto;
+    height: 72px; 
+    padding: 0;
+    border-right: none;
+    border-top: 1px solid var(--slate-200);
+    z-index: 1001;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    display: block; /* Switch from flex to allow nav-group to take over */
+  }
+  #nav-group {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: stretch;
+    justify-content: center;
+  }
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin-bottom: 4px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .nav-link { 
+    flex: 1; 
+    flex-direction: column; 
+    justify-content: center; 
+    gap: 4px; 
+    border-radius: 0; 
+    margin: 0; 
+    font-size: 0.65rem;
+    padding: 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .nav-link svg { width: 22px; height: 22px; }
+}
+
+.nav-link:hover { background: var(--slate-100); color: var(--text-primary); }
+.nav-link.active { 
+  background: var(--primary-glow); 
+  color: var(--primary);
+  box-shadow: inset 0 -3px 0 var(--primary);
+}
+@media (min-width: 1025px) {
+  .nav-link.active { box-shadow: inset 0 0 0 1px hsla(230, 85%, 58%, 0.1); }
+  .nav-sep { margin-top: 12px; border-top: 1px solid var(--slate-100); padding-top: 16px; }
+}
+
+.sidebar .logo { margin-bottom: 2.5rem; padding-left: 10px; }
+@media (max-width: 1024px) { .sidebar .logo { display: none; } }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--slate-200);
+}
+@media (max-width: 1024px) { .sidebar-footer { display: none; } }
+
+/* Main Content Area */
+.main-content {
+  padding: 2.5rem 4rem;
+  max-width: 1400px;
+  width: 100%;
+}
+@media (max-width: 1024px) { .main-content { padding: 1.5rem 1rem 100px; } }
+@media (max-width: 640px) { .main-content { padding: 1rem 0.75rem 90px; } }
+
+/* Fix Global Header for Dashboard Layout */
+.header-standalone { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  margin-bottom: 3rem; 
+}
+@media (max-width: 1024px) {
+  .header-standalone { 
+    position: sticky; top: 0; 
+    background: var(--bg-glass); 
+    backdrop-filter: blur(10px); 
+    z-index: 1000; 
+    margin: -1.5rem -1rem 2rem; 
+    padding: 0.75rem 1rem; 
+    border-bottom: 1px solid var(--slate-200); 
+  }
+}
+@media (max-width: 480px) {
+  .header-standalone .logo-text { font-size: 1.1rem; }
+  .header-standalone .logo-sub { font-size: 0.6rem; }
+}
+
+/* Global Reset & Base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-base);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(230, 85%, 58%, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(230, 85%, 58%, 0.05) 0px, transparent 50%);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Elite Header */
+.header {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--slate-200);
+  padding: 1.25rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--slate-900);
+  color: white;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2));
+}
+
+.logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--slate-900);
+}
+
+.logo-sub {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  margin-top: -2px;
+}
+
+/* Page Containers */
+.page {
+  display: none;
+  padding: 3rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.page.active { 
+  display: block; 
+  animation: pageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Professional Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elite);
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .winner-card { flex-direction: column; text-align: center; padding: 2rem 1.5rem !important; gap: 20px !important; }
+  .winner-card div:last-child { text-align: center !important; }
+}
+
+/* Typography Extensions */
+.editorial-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--slate-900);
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--slate-900);
+}
+
+/* Elite Component: Buttons */
+.btn-primary {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--slate-900);
+  color: white;
+  border: 1px solid var(--slate-900);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px var(--primary);
+}
+
+.btn-primary:active { transform: translateY(0) scale(0.98); }
+
+.btn-outline {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--slate-900);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover { background: var(--slate-100); border-color: var(--slate-900); }
+
+/* Elite Component: Inputs */
+.field { margin-bottom: 1.5rem; }
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--slate-600);
+  margin-bottom: 8px;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--slate-100);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--slate-900);
+  transition: all 0.2s;
+}
+
+.field input:focus {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}
+
+/* Elite Component: Badges */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-green { background: var(--accent-success-soft); color: var(--accent-success); border: 1px solid hsla(155, 100%, 30%, 0.1); }
+.badge-blue { background: hsl(230, 85%, 98%); color: var(--primary); border: 1px solid hsla(230, 85%, 58%, 0.1); }
+
+/* Login Portal Layout */
+.login-wrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-items: center;
+  min-height: 70vh;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 3.5rem;
+  position: relative;
+}
+@media (max-width: 640px) {
+  .login-card { padding: 2.5rem 1.5rem; }
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 6px;
+  background: var(--primary);
+}
+
+.candidates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin: 2rem 0 8rem;
+  min-height: 400px;
+}
+@media (max-width: 640px) {
+  .candidates-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 6rem; }
+}
+
+.candidate-card {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  will-change: transform, opacity;
+  animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+@media (max-width: 640px) {
+  .candidate-card { padding: 2rem 1.5rem; }
+}
+
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.group-title {
+  grid-column: 1 / -1;
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--slate-200);
+  width: 100%;
+}
+
+.candidate-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+}
+
+.candidate-card.selected {
+  border-color: var(--primary);
+  background: hsla(230, 85%, 58%, 0.05);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+  transform: translateY(-4px);
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 var(--primary-glow); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Modal Overlay System */
+.modal-overlay, .profile-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-box, .profile-box {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--shadow-elite);
+  text-align: center;
+  animation: modalScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@media (max-width: 480px) {
+  .modal-box, .profile-box { padding: 32px 20px; }
+}
+
+@keyframes modalScale {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Page Isolation */
+.page { display: none; width: 100%; }
+.page.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Global UI Elements */
+.section-title { font-family: var(--font-serif); font-size: 2.5rem; color: var(--text-primary); margin-bottom: 0.5rem; line-height: 1.1; }
+.section-sub { font-size: 1rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 2rem; }
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px var(--primary-glow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--slate-200);
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-outline:hover { background: var(--slate-100); border-color: var(--slate-300); }
+
+.btn-vote {
+  background: var(--slate-900);
+  color: white;
+  padding: 18px 48px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.3;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-vote.ready {
+  background: var(--primary);
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow: 0 15px 30px -5px var(--primary-glow);
+  transform: scale(1.02);
+}
+
+.vote-footer {
+  position: sticky;
+  bottom: 2rem;
+  left: 0; right: 0;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--slate-200);
+  padding: 1.5rem 2.5rem;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.15);
+  z-index: 500;
+  margin-top: 1rem;
+}
+@media (max-width: 1024px) {
+  .vote-footer { bottom: 84px; margin: 0; padding: 1.25rem 1.5rem; width: 100%; }
+}
+@media (max-width: 640px) {
+  .vote-footer { flex-direction: column; gap: 16px; text-align: center; border-radius: var(--radius-md) var(--radius-md) 0 0; bottom: 70px; margin: 1rem -1rem -1.5rem; }
+  .btn-vote { width: 100%; }
+}
+
+/* Modals & Overlays */
+.modal-overlay, .profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: hsla(220, 30%, 6%, 0.4);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-box, .profile-box {
+  background: var(--bg-card);
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.25);
+  animation: modalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+.profile-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; }
+.profile-name { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 0.5rem; }
+.profile-motto { color: var(--primary); font-weight: 700; font-size: 0.9rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+.profile-bio { color: var(--text-secondary); line-height: 1.7; font-size: 1rem; }
+
+.modal-box h3 { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 12px; }
+.modal-btns { display: flex; gap: 12px; margin-top: 32px; }
+.btn-cancel { flex: 1; background: var(--slate-100); border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; }
+.btn-confirm { flex: 2; background: var(--primary); color: white; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+
+/* Skeleton Shimmer Engine */
+.skeleton {
+  background: var(--slate-100);
+  background: linear-gradient(90deg, var(--slate-100) 25%, var(--slate-200) 50%, var(--slate-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+.skeleton-text { height: 12px; margin-bottom: 8px; width: 80%; }
+.skeleton-title { height: 24px; margin-bottom: 12px; width: 60%; }
+.skeleton-avatar { width: 48px; height: 48px; border-radius: 50%; }
+
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary);
+  top: -10px;
+  z-index: 9999;
+  border-radius: 2px;
+  animation: confettiFall 3s ease-out forwards;
+}
+
+/* Toast System */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elite);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  animation: toastSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--primary);
+}
+
+.toast.error::before { background: var(--accent-error); }
+.toast.success::before { background: var(--accent-success); }
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.toast.exit {
+  animation: toastExit 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastExit {
+  to { opacity: 0; transform: translateX(100%); }
+}
+
+/* Admin Suite UI Engine */
+.admin-tab {
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--slate-100);
+  padding: 6px;
+  border-radius: var(--radius-md);
+  margin-bottom: 2.5rem;
+  width: fit-content;
+  border: 1px solid var(--slate-200);
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+.admin-tabs::-webkit-scrollbar { display: none; }
+@media (max-width: 640px) {
+  .admin-tabs { width: 100%; justify-content: flex-start; padding: 6px; border-radius: var(--radius-lg); }
+  .admin-tab { padding: 12px 24px; font-size: 0.8125rem; white-space: nowrap; flex-shrink: 0; }
+}
+
+.admin-tab.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
+  border-color: var(--slate-200);
+}
+
+.admin-section { display: none; }
+.admin-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-elite);
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 600px;
+}
+
+th {
+  background: var(--slate-100);
+  padding: 16px 24px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--slate-100);
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--slate-100); transition: background 0.2s; }
+
+.admin-candidate-module {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-elite);
+}
+
+.info-note {
+  background: var(--primary-glow);
+  color: var(--primary);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-blue { background: var(--primary); color: white; }
+.btn-blue:hover { transform: translateY(-1px); box-shadow: 0 4px 12px var(--primary-glow); }
+
+.badge-amber { background: #FEF3C7; color: #92400E; border: 1px solid rgba(146,64,14,0.1); }
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 4px white, var(--shadow-elite);
+}
+
+.cand-name {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--slate-900);
+}
+
+.cand-motto {
+  font-size: 0.8125rem;
+  color: var(--slate-600);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.check-elite {
+  display: none;
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  animation: scalePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scalePop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.candidate-card.selected .check-elite { display: flex; }
+
+/* Sovereign Admin UI Kit */
+.avatar-sm { 
+  width: 64px; 
+  height: 64px; 
+  border-radius: 12px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 800; 
+  font-size: 1.25rem; 
+  flex-shrink: 0;
+  box-shadow: var(--shadow-elite);
+  border: 1px solid var(--slate-200);
+}
+
+.input-minimal {
+  background: var(--slate-100);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+.input-minimal:focus {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+  outline: none;
+}
+
+.btn-icon {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.btn-icon:hover { border-color: var(--primary); color: var(--primary); transform: scale(1.1); }
+
+.btn-icon:hover { border-color: var(--primary); color: var(--primary); transform: scale(1.1); }
+
+/* Compact Management Suite */
+table .field { margin-bottom: 0.75rem; }
+table .field:last-child { margin-bottom: 0; }
+table .field label { margin-bottom: 4px; opacity: 0.8; font-size: 0.65rem; }
+
+.btn-ghost-error {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--accent-error);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost-error:hover {
+  background: var(--accent-error-soft);
+  border-color: var(--accent-error-soft);
+}
+
+/* Admin Analytics Dashboard */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 2.5rem;
+}
+@media (max-width: 1024px) {
+  .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .analytics-grid { grid-template-columns: 1fr; gap: 8px; }
+  .stat-elite { padding: 16px 20px; }
+  .stat-elite-val { font-size: 1.5rem; }
+}
+
+.stat-elite {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-200);
+}
+
+.stat-elite-label { font-size: 0.7rem; font-weight: 800; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.08em; }
+.stat-elite-val { font-size: 2rem; font-weight: 800; color: var(--slate-900); margin-top: 4px; font-family: var(--font-heading); letter-spacing: -0.02em; }
+
+/* Scrollbar Elite */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--slate-600); }
+</style>
+
+<div class="app">
+  <!-- DASHBOARD WRAPPER -->
+  <div class="dashboard-layout" id="dash-layout" style="display:none;">
+    <aside class="sidebar">
+      <div class="logo">
+        <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.25rem;box-shadow:var(--shadow-elite);">V</div>
+        <div>
+          <div class="logo-text" style="font-family:var(--font-heading);text-transform:uppercase;letter-spacing:1px;">IPE VOTE</div>
+          <div class="logo-sub">Selection of CR</div>
+        </div>
+      </div>
+      
+      <nav id="nav-group">
+        <div class="nav-link active" onclick="showPage('page-vote')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          <span>Voting Booth</span>
+        </div>
+        <div class="nav-link" id="nav-results" onclick="showPage('page-results')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <span>Live Results</span>
+        </div>
+        <div class="nav-link" id="nav-admin" style="display:none;" onclick="showPage('page-admin')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>Admin Panel</span>
+        </div>
+        <div class="nav-link nav-sep" id="nav-voter-view" style="display:none;" onclick="showPage('page-vote')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <span style="color: var(--primary);">Voter View</span>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button id="theme-toggle-sidebar" class="btn-outline" style="width:100%; justify-content: flex-start; margin-bottom: 12px; border:none; background: var(--slate-100);">
+          <span id="theme-label">Dark Mode</span>
+        </button>
+        <div class="nav-link" onclick="logout()" style="color:var(--accent-error);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Logout</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="header-standalone">
+        <div class="logo" style="display:flex; align-items:center; gap:12px;">
+          <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.25rem;box-shadow:var(--shadow-elite);">V</div>
+          <div>
+            <div class="logo-text" style="font-family:var(--font-heading);text-transform:uppercase;letter-spacing:1px;font-weight:800;font-size:1.25rem;color:var(--text-primary);">IPE VOTE</div>
+            <div class="logo-sub" style="font-size:0.75rem;color:var(--text-secondary);font-weight:500;">Selection of CR</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <span class="badge badge-green" id="hdr-badge-dash" style="white-space:nowrap;">VOTING ACTIVE</span>
+          <div class="user-chip" style="display:flex; align-items:center; gap:8px;">
+            <div class="user-dot" id="user-dot-dash" style="width:32px;height:32px;border-radius:50%;background:var(--slate-200);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">?</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page targets will be moved here by JS -->
+      <div id="page-container"></div>
+    </main>
+  </div>
+
+  <!-- THE ORIGINAL HEADER (Kept for Login/Pending or as fallback) -->
+  <div class="header" id="main-header">
+    <div class="logo">
+      <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.25rem;box-shadow:var(--shadow-elite);">V</div>
+      <div>
+        <div class="logo-text" style="font-family:var(--font-heading);text-transform:uppercase;letter-spacing:1px;">IPE VOTE</div>
+        <div class="logo-sub">Selection of CR</div>
+      </div>
+    </div>
+    <div class="header-right" style="display:flex; align-items:center; gap:16px;">
+      <button id="theme-toggle" class="btn-outline" style="padding: 8px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--slate-200); flex-shrink:0;">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <circle cx="12" cy="12" r="5"></circle>
+        </svg>
+      </button>
+      <span class="badge badge-green" id="hdr-badge" style="white-space:nowrap; height: fit-content; padding: 6px 12px;">VOTING OPEN</span>
+      <div class="user-chip" id="user-chip" style="display:none; align-items:center; gap:8px;">
+        <div class="user-dot" id="user-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="page active" id="page-login">
+    <div class="login-wrap">
+      <div class="card login-card">
+        <div class="editorial-title" id="auth-title">Portal Admission</div>
+        <div class="card-sub" id="auth-sub" style="margin-bottom: 2.5rem; font-weight: 500;">Verify your student credentials to proceed to the ballot.</div>
+        <div id="register-fields" style="display:none;">
+          <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. Rahim Chowdhury"/></div>
+          <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="you@school.edu"/></div>
+          <div class="field"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="+880..."/></div>
+          <div class="field"><label>Student ID</label><input type="text" id="reg-id" placeholder="e.g. STU-2024-001"/></div>
+        </div>
+        <div id="login-fields">
+          <div class="field"><label>Student ID</label><input type="text" id="login-id" placeholder="e.g. STU-2024-001"/></div>
+          <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="you@school.edu"/></div>
+        </div>
+        <div class="err" id="auth-err"></div>
+        <div class="succ" id="auth-succ"></div>
+        <button class="btn-primary" onclick="handleAuth()" id="auth-btn">Sign In</button>
+        <div class="toggle-link"><span id="toggle-mode" onclick="toggleMode()">Don't have an account? Register</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDING APPROVAL -->
+  <div class="page" id="page-pending">
+    <div class="pending-wrap">
+      <div class="pending-card">
+        <div class="pending-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;">Awaiting approval</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6;">Your registration is pending admin approval. You will be able to vote once an admin approves your account.</div>
+        <button class="btn-primary" style="margin-top:1.25rem;" onclick="logout()">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOTE PAGE -->
+  <div class="page" id="page-vote">
+    <div class="vote-header">
+      <div class="section-title">Cast Your Vote</div>
+      <div class="section-sub">Select one candidate. Your identity is kept anonymous.</div>
+      <div class="vote-meta">
+        <span>Votes cast: <strong id="vote-count-live">—</strong></span>
+        <span>Deadline: <strong id="deadline-label">—</strong></span>
+      </div>
+    </div>
+    <div class="deadline-banner" id="deadline-banner" style="display:none;">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><circle cx="8" cy="8" r="6.5" stroke="#854F0B" stroke-width="1.2"/><path d="M8 5v3l1.5 1.5" stroke="#854F0B" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span id="deadline-text"></span>
+    </div>
+    <div class="candidates-grid" id="candidates-grid"></div>
+    <div class="vote-footer">
+      <span class="vote-hint" id="vote-hint">Select a candidate to continue</span>
+      <button class="btn-vote" id="btn-vote" onclick="showConfirm()">Submit Vote</button>
+    </div>
+    <div class="modal-overlay" id="confirm-overlay">
+      <div class="modal-box">
+        <h3>Confirm your vote</h3>
+        <p>You are voting for <strong id="confirm-name"></strong>.<br>Your vote is anonymous. This cannot be undone.</p>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="hideConfirm()">Go back</button>
+          <button class="btn-confirm" id="btn-confirm" onclick="submitVote()">Confirm vote</button>
+        </div>
+      </div>
+    </div>
+    <!-- Profile modal inside vote page -->
+    <div class="profile-overlay" id="profile-overlay">
+      <div class="profile-box">
+        <div class="profile-avatar" id="prof-avatar"></div>
+        <div class="profile-name" id="prof-name"></div>
+        <div class="profile-motto" id="prof-motto"></div>
+        <div class="profile-bio" id="prof-bio"></div>
+        <button class="btn-primary" style="margin-top:14px;" onclick="closeProfile()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="page" id="page-success">
+    <div class="success-wrap" style="max-width: 500px; margin: 4rem auto;">
+      <div class="card" style="text-align: center; padding: 4rem 2rem; border-top: 6px solid var(--accent-success);">
+        <div class="success-icon" style="background: var(--accent-success-soft); color: var(--accent-success); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; box-shadow: 0 10px 20px rgba(16,185,129,0.15);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="40" height="40">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 style="font-family: var(--font-serif); font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-primary);">Ballot Secured</h2>
+        <div style="font-size:1.125rem; color:var(--text-secondary); margin-bottom: 2.5rem; font-weight: 500; line-height: 1.6;" id="success-msg">Your anonymous contributions have been encrypted and recorded in the sovereign ledger.</div>
+        <button class="btn-primary" style="width:100%; border-radius: var(--radius-lg); padding: 16px;" onclick="goToResults()">
+          View Live Results
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="page" id="page-results">
+    <div class="results-layout">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom: 2.5rem;">
+        <div>
+          <h1 style="font-family: var(--font-serif); font-size: 3rem; margin-bottom: 0.5rem; color: var(--text-primary);">Election Results</h1>
+          <p style="color: var(--text-secondary); font-size: 1rem; font-weight: 500; letter-spacing: -0.01em;">Sovereign Live Tracking • Verified Participation Only</p>
+        </div>
+        <button class="btn-outline" style="width:auto; padding: 10px 20px; font-size: 0.8125rem; font-weight: 700; display:flex; align-items:center; gap:8px;" onclick="loadResults()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          Refresh Data
+        </button>
+      </div>
+      <div class="locked-banner" id="locked-banner" style="display:none; margin-bottom: 2rem;">
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span>Data access restricted. Waiting for executive release.</span>
+      </div>
+      <div id="results-content"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="page" id="page-admin">
+    <div class="admin-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="section-title">Admin Panel</div>
+        <span class="badge badge-blue">Admin</span>
+      </div>
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchTab('tab-students')">Students</div>
+        <div class="admin-tab" onclick="switchTab('tab-candidates')">Candidates</div>
+        <div class="admin-tab" onclick="switchTab('tab-votes')">Votes</div>
+        <div class="admin-tab" onclick="switchTab('tab-settings')">Settings</div>
+      </div>
+
+      <!-- Students -->
+      <div class="admin-section active" id="tab-students">
+        <div class="info-note">Approve students to allow them to vote. Pending students cannot cast votes.</div>
+        <div class="table-wrap"><table id="students-table"><tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--color-text-secondary);">Loading...</td></tr></table></div>
+      </div>
+
+      <!-- Candidates -->
+      <div class="admin-section" id="tab-candidates">
+        <div class="info-note">Add, remove, or modify candidates and their ballot groups.</div>
+        <div class="table-wrap"><table id="cand-table"><tr><td style="text-align:center;padding:1.5rem;color:var(--color-text-secondary);">Synchronizing...</td></tr></table></div>
+      </div>
+
+      <!-- Votes -->
+      <div class="admin-section" id="tab-votes">
+        <div class="info-note">Votes are anonymous to students. Only admins can see vote details here.</div>
+        <div class="table-wrap"><table id="votes-table"><tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--color-text-secondary);">Loading...</td></tr></table></div>
+      </div>
+
+      <div class="admin-section" id="tab-settings">
+        <div class="card" style="padding: 2rem;">
+          <div class="settings-row" style="padding-bottom: 24px; border-bottom: 1px solid var(--slate-200); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div class="settings-label" style="font-weight: 800; font-family: var(--font-heading); font-size: 1.125rem;">Global Results Visibility</div>
+              <div class="settings-desc">Control when students can access the final tallies</div>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 10px 20px;" id="btn-release" onclick="toggleResults()">Release Results</button>
+          </div>
+          <div class="settings-row" style="padding-bottom: 24px; border-bottom: 1px solid var(--slate-200); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div class="settings-label" style="font-weight: 800; font-family: var(--font-heading); font-size: 1.125rem;">Ballot Access</div>
+              <div class="settings-desc">Open or close the voting system immediately</div>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 10px 20px;" id="btn-voting" onclick="toggleVoting()">Close Voting</button>
+          </div>
+          <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div class="settings-label" style="font-weight: 800; font-family: var(--font-heading); font-size: 1.125rem;">Executive Management</div>
+              <div class="settings-desc">Export data or factory reset the system</div>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <button class="btn-outline" onclick="exportResults()">Export CSV</button>
+              <button class="btn-outline" style="color:var(--accent-error); border-color:var(--accent-error);" onclick="resetElection()">Reset System</button>
+            </div>
+          </div>
+        </div>
+        <div class="err" id="settings-err"></div>
+        <div class="succ" id="settings-succ"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CANDIDATE MODAL -->
+  <div class="modal-overlay" id="add-cand-overlay">
+    <div class="modal-box" style="max-width: 440px; text-align: left;">
+      <h3 style="margin-bottom: 8px;">New Commission</h3>
+      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.875rem;">Add a new candidate to the sovereign ballot.</p>
+      <div class="field"><label>Candidate Full Name</label><input type="text" id="add-c-name" placeholder="e.g. Arif Hossain" class="input-minimal" style="width:100%;"></div>
+      <div class="field">
+        <label>Ballot Assignment</label>
+        <select id="add-c-group" class="input-minimal" style="width:100%; height:46px;">
+          <option value="A">Group A (Standard)</option>
+          <option value="B">Group B (Reserve)</option>
+        </select>
+      </div>
+      <div class="modal-btns" style="margin-top: 32px;">
+        <button class="btn-cancel" onclick="hideEl('add-cand-overlay')">Discard</button>
+        <button class="btn-confirm" onclick="processAddCandidate()">Enlist Candidate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+<script>
+const SB = 'https://jkernnkxlazmmndzrzkl.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprZXJubmt4bGF6bW1uZHpyemtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MjM4ODUsImV4cCI6MjA5MjA5OTg4NX0.T4nWhLGVhV0sbfGmf6Hqw6dw_WZYtaTu1X0g9nuF6ug';
+
+let currentUser=null, selectedA=null, selectedB=null, isRegMode=false;
+let electionSettings={results_released:false,voting_open:true,deadline:null};
+let candidatesData=[]; // Sovereign Data Store
+
+const colors=[
+  {bg:'#E6F1FB',text:'#185FA5'},{bg:'#E1F5EE',text:'#0F6E56'},
+  {bg:'#FAEEDA',text:'#854F0B'},{bg:'#FAECE7',text:'#993C1D'},
+  {bg:'#EEEDFE',text:'#3C3489'},{bg:'#FBEAF0',text:'#993556'},
+  {bg:'#EAF3DE',text:'#3B6D11'},{bg:'#FCEBEB',text:'#A32D2D'},
+  {bg:'#F1EFE8',text:'#444441'},{bg:'#B5D4F4',text:'#0C447C'}
+];
+
+async function sb(path,opts={}){
+  const r=await fetch(SB+'/rest/v1/'+path,{...opts,headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':opts.prefer||'return=representation',...(opts.headers||{})}});
+  const t=await r.text(); let d=null; try{d=JSON.parse(t);}catch(e){d=t;}
+  return{ok:r.ok,status:r.status,data:d};
+}
+
+// ==========================================
+// CORE NAVIGATION & SYSTEM STATE
+// ==========================================
+
+function initials(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+function toast(msg, type='info') {
+  const container = document.getElementById('toast-container');
+  if(!container) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div style="font-weight:600; font-size: 0.875rem;">${msg}</div>`;
+  container.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('exit');
+    setTimeout(() => t.remove(), 400);
+  }, 4000);
+}
+
+function showPage(id) {
+  // Global visibility cleanup
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+  const profOverlay = document.getElementById('profile-overlay');
+  if(profOverlay) profOverlay.style.display = 'none';
+
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  const dash = document.getElementById('dash-layout');
+  const header = document.getElementById('main-header');
+  const container = document.getElementById('page-container');
+  
+  if (id === 'page-login' || id === 'page-pending') {
+    dash.style.display = 'none';
+    header.style.display = 'flex';
+    document.querySelector('.app').appendChild(target);
+  } else {
+    dash.style.display = 'grid';
+    header.style.display = 'none';
+    if(target.parentNode !== container) container.appendChild(target);
+    
+    if (currentUser) {
+      const uDot = document.getElementById('user-dot-dash');
+      if(uDot) uDot.textContent = initials(currentUser.name);
+      const adminNav = document.getElementById('nav-admin');
+      const voterNav = document.getElementById('nav-voter-view');
+      if(adminNav) adminNav.style.display = currentUser.is_admin ? 'flex' : 'none';
+      if(voterNav) voterNav.style.display = currentUser.is_admin ? 'flex' : 'none';
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      const onclick = link.getAttribute('onclick') || '';
+      link.classList.toggle('active', onclick.includes(id));
+    });
+
+    if(id === 'page-results') loadResults();
+    if(id === 'page-vote') {
+      loadVoteCount();
+      renderCandidates();
+    }
+  }
+  
+  target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showErr(id, msg) { toast(msg, 'error'); }
+function showSucc(id, msg) { toast(msg, 'success'); }
+function hideEl(id){const e=document.getElementById(id);if(e)e.style.display='none';}
+function showEl(id,disp='block'){const e=document.getElementById(id);if(e)e.style.display=disp;}
+
+// Theme Engine
+function initTheme() {
+  const toggles = [document.getElementById('theme-toggle'), document.getElementById('theme-toggle-sidebar')];
+  const label = document.getElementById('theme-label');
+  const current = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if(label) label.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    updateThemeIcon(theme);
+  };
+
+  applyTheme(current);
+  
+  toggles.forEach(t => {
+    if(!t) return;
+    t.onclick = () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    };
+  });
+}
+
+function updateThemeIcon(theme) {
+  const icon = document.getElementById('theme-icon');
+  if (theme === 'dark') {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+  }
+}
+window.addEventListener('DOMContentLoaded', initTheme);
+
+function celebrate() {
+  const colors = ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#10b981'];
+  for (let i = 0; i < 75; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 2 + 's';
+    c.style.width = (Math.random() * 8 + 4) + 'px';
+    c.style.height = c.style.width;
+    c.style.zIndex = '99999';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+// Live Dashboard Sync Interval (Every 60s)
+setInterval(() => {
+  const active = document.querySelector('.page.active');
+  if(active && active.id === 'page-results') loadResults();
+  if(active && active.id === 'page-vote') loadVoteCount();
+}, 60000);
+
+function toggleMode(){
+  isRegMode=!isRegMode;
+  document.getElementById('register-fields').style.display=isRegMode?'block':'none';
+  document.getElementById('login-fields').style.display=isRegMode?'none':'block';
+  document.getElementById('auth-title').textContent=isRegMode?'Portal Entry':'Portal Admission';
+  document.getElementById('auth-sub').textContent=isRegMode?'Register your academic profile to participate':'Verify your student credentials to proceed to the ballot';
+  document.getElementById('auth-btn').textContent=isRegMode?'Create Account':'Sign In';
+  document.getElementById('toggle-mode').textContent=isRegMode?'Already enrolled? Sign In':'New candidate? Register Profile';
+  hideEl('auth-err');hideEl('auth-succ');
+}
+
+async function handleAuth(){
+  const btn=document.getElementById('auth-btn');
+  btn.disabled=true;btn.textContent=isRegMode?'Registering...':'Signing in...';
+  hideEl('auth-err');hideEl('auth-succ');
+  try{
+    if(isRegMode){
+      const name=document.getElementById('reg-name').value.trim();
+      const email=document.getElementById('reg-email').value.trim();
+      const phone=document.getElementById('reg-phone').value.trim();
+      const sid=document.getElementById('reg-id').value.trim();
+      if(!name||!email||!phone||!sid){showErr('auth-err','Please fill in all fields.');return;}
+      const r=await sb('students',{method:'POST',prefer:'return=representation',body:JSON.stringify({student_id:sid,full_name:name,email,phone,approved:false,is_admin:false})});
+      if(!r.ok){
+        const msg=r.data?.message||'';
+        showErr('auth-err',msg.includes('duplicate')||msg.includes('unique')?'This Student ID is already registered.':'Registration failed: '+(r.data?.message||r.status));
+        return;
+      }
+      showSucc('auth-succ','Registered! Waiting for admin approval...');
+      setTimeout(()=>{currentUser={sid,name,approved:false,is_admin:false};setUserChip();showPage('page-pending');},900);
+    } else {
+      const sid=document.getElementById('login-id').value.trim();
+      const email=document.getElementById('login-email').value.trim();
+      if(!sid||!email){showErr('auth-err','Please enter your Student ID and email.');return;}
+      const r=await sb(`students?student_id=ilike.${encodeURIComponent(sid)}&email=ilike.${encodeURIComponent(email)}&select=student_id,full_name,approved,is_admin`);
+      if(!r.ok||!r.data||r.data.length===0){showErr('auth-err','No account found. Check your details or register first.');return;}
+      const u=r.data[0];
+      currentUser={sid:u.student_id,name:u.full_name,approved:u.approved,is_admin:u.is_admin};
+      setUserChip();
+      await afterLogin();
+    }
+  }catch(e){showErr('auth-err','Network error. Please try again.');}
+  finally{btn.disabled=false;btn.textContent=isRegMode?'Register':'Sign In';}
+}
+
+function setUserChip(){
+  // Ensure the chips are visible
+  showEl('user-chip','flex');
+  showEl('user-chip-dash','flex');
+
+  // Update Portal Initial
+  const dot = document.getElementById('user-dot');
+  if(dot) dot.textContent = initials(currentUser.name);
+  
+  // Update Dash Initial
+  const dashDot = document.getElementById('user-dot-dash');
+  if(dashDot) dashDot.textContent = initials(currentUser.name);
+  
+  // Update Sidebar Label if exists
+  const label = document.getElementById('user-name-label');
+  if(label) label.textContent = currentUser.name.split(' ')[0] + (currentUser.is_admin ? ' (Admin)' : '');
+}
+
+async function afterLogin(){
+  await loadSettings();
+  // Persistent Session: Save to browser storage
+  localStorage.setItem('cv_user', JSON.stringify(currentUser));
+  
+  if(currentUser.is_admin){await loadAdminData();showPage('page-admin');return;}
+  if(!currentUser.approved){showPage('page-pending');return;}
+  
+  // Ensure Shadow Identities exist for Dual-Voting (Bypasses FK constraints)
+  try {
+    const sync = await Promise.all([
+      sb('students', {method:'POST', body:JSON.stringify({student_id: currentUser.sid+'_A', full_name: currentUser.name + ' (A)', email: currentUser.sid+'_A@classvote.local', phone: '00000000000', approved: true, is_admin: false}), headers: {'Prefer': 'resolution=merge-duplicates'}}),
+      sb('students', {method:'POST', body:JSON.stringify({student_id: currentUser.sid+'_B', full_name: currentUser.name + ' (B)', email: currentUser.sid+'_B@classvote.local', phone: '00000000000', approved: true, is_admin: false}), headers: {'Prefer': 'resolution=merge-duplicates'}})
+    ]);
+    // Ignore 409 (Conflict) - it means the identity is already registered
+    const failed = sync.filter(r => !r.ok && r.status !== 409);
+    if(failed.length > 0) console.warn('Shadow sync issues:', failed);
+  } catch(e) { console.warn('Shadow sync failed', e); }
+
+  const vr=await sb(`votes?student_id=eq.${encodeURIComponent(currentUser.sid+'_A')}&select=candidate_id`);
+  if(vr.ok&&vr.data&&vr.data.length>0){await loadResults();showPage('page-results');}
+  else{await loadCandidates();renderCandidates();await loadVoteCount();showPage('page-vote');}
+}
+
+async function exportResults() {
+  const r = await sb('votes?select=candidate_id');
+  if(!r.ok) return toast('Failed to fetch votes', 'error');
+  if(!candidatesData.length) await loadCandidates();
+  
+  const counts = {};
+  r.data.forEach(v => { counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1; });
+  
+  const data = candidatesData.map(c => ({name: c.name, votes: counts[c.id] || 0}));
+  let csv = 'Candidate,Votes\n' + data.map(d => `"${d.name}",${d.votes}`).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', 'classvote_results.csv');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast('Results exported as CSV', 'success');
+}
+
+async function resetElection() {
+  if(!confirm('CRITICAL ACTION: This will permanently delete ALL votes, candidates, and non-admin student records. Everything will be wiped. Are you absolutely sure?')) return;
+  
+  toast('Initiating total system purge...', 'info');
+  
+  try {
+    // 1. Wipe Votes
+    const v = await sb('votes', {method: 'DELETE', headers: {'Prefer': 'count=exact'}});
+    
+    // 2. Wipe Candidates
+    const c = await sb('candidates', {method: 'DELETE', headers: {'Prefer': 'count=exact'}});
+    
+    // 3. Wipe Voters (Keep Admins)
+    const s = await sb('students?is_admin=eq.false', {method: 'DELETE', headers: {'Prefer': 'count=exact'}});
+    
+    // 4. Wipe Storage (Objects in candidates bucket)
+    // Note: This requires the correct permissions set in the master SQL
+    await fetch(`${SB}/storage/v1/object/candidates`, {
+      method: 'DELETE',
+      headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
+    });
+
+    toast('System purged. Session will restart.', 'success');
+    setTimeout(() => logout(), 1500);
+  } catch(e) {
+    toast('Partial failure during purge. Check console.', 'error');
+    console.error(e);
+  }
+}
+
+async function loadSettings(){
+  const r=await sb('election_settings?id=eq.1&select=results_released,voting_open,deadline');
+  if(r.ok&&r.data&&r.data.length>0){
+    electionSettings=r.data[0];
+    updateHeaderBadge();
+    updateDeadlineBanner();
+  }
+}
+
+function updateHeaderBadge(){
+  const b=document.getElementById('hdr-badge');
+  if(!electionSettings.voting_open){b.textContent='Voting Closed';b.className='badge badge-red';}
+  else{b.textContent='Voting Open';b.className='badge badge-green';}
+}
+
+function updateDeadlineBanner(){
+  if(!electionSettings.deadline)return;
+  const dl=new Date(electionSettings.deadline);
+  const now=new Date();
+  const diff=dl-now;
+  const lbl=document.getElementById('deadline-label');
+  if(lbl)lbl.textContent=dl.toLocaleString();
+  const banner=document.getElementById('deadline-banner');
+  const txt=document.getElementById('deadline-text');
+  if(banner&&txt){
+    if(diff>0&&diff<86400000){
+      const hrs=Math.floor(diff/3600000);const mins=Math.floor((diff%3600000)/60000);
+      txt.textContent=`Voting closes in ${hrs}h ${mins}m`;
+      banner.style.display='flex';
+    } else if(diff<=0){
+      txt.textContent='Voting deadline has passed.';
+      banner.style.display='flex';
+    } else {banner.style.display='none';}
+  }
+}
+
+async function loadCandidates(){
+  try {
+    const r=await sb('candidates?select=*&order=id.asc');
+    if(r.ok&&r.data) {
+      candidatesData=r.data;
+    } else {
+      console.error('Candidate Handshake Failed:', r.status);
+      candidatesData = [];
+    }
+  } catch (e) {
+    console.error('Network Interruption during Roster sync');
+    candidatesData = [];
+  }
+}
+
+function renderCandidates(){
+  const grid=document.getElementById('candidates-grid');
+  if(!grid) return;
+  
+  if(!candidatesData || candidatesData.length===0){
+    grid.innerHTML = `
+      <div style="grid-column:1/-1; text-align:center; padding:4rem 2rem; background:var(--slate-50); border-radius:var(--radius-lg); border:1px dashed var(--slate-200);">
+        <div style="font-size:3rem; margin-bottom:1.5rem;">📋</div>
+        <div style="font-family:var(--font-serif); font-size:1.5rem; color:var(--text-primary); margin-bottom:0.5rem;">Candidate Roster Pending</div>
+        <div style="color:var(--text-secondary); font-weight:500;">The administration is currently commissioning the official candidate list. <br>Please check back shortly to cast your ballot.</div>
+      </div>
+    `;
+    return;
+  }
+  
+  grid.innerHTML='';
+  
+  const groupA = candidatesData.filter(c => c.category === 'A');
+  const groupB = candidatesData.filter(c => c.category === 'B');
+
+  // Render Group A
+  if(groupA.length > 0) {
+    const h = document.createElement('div'); h.className = 'group-title'; h.textContent = 'Group A'; grid.appendChild(h);
+    groupA.forEach(c => grid.appendChild(createCandidateCard(c)));
+  }
+
+  // Render Group B
+  if(groupB.length > 0) {
+    const h = document.createElement('div'); h.className = 'group-title'; h.textContent = 'Group B'; grid.appendChild(h);
+    groupB.forEach(c => grid.appendChild(createCandidateCard(c)));
+  }
+}
+
+function createCandidateCard(c) {
+  const col = colors[c.id % colors.length];
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  if(c.id === selectedA || c.id === selectedB) card.classList.add('selected');
+  card.id = 'cand-' + c.id;
+  
+  const avatarHtml = c.image_url 
+    ? `<img src="${c.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${c.name}">`
+    : initials(c.name);
+
+  card.innerHTML = `
+    <div class="check-elite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+    <div class="avatar" style="background:${col.bg};color:${col.text}; margin: 0 auto 1.5rem; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:900;">${avatarHtml}</div>
+    <div class="cand-name" style="font-size:1.5rem; font-weight:800; color:var(--text-primary); margin-bottom:0.4rem; font-family:var(--font-heading);">${c.name}</div>
+    <div class="cand-motto" style="font-size:0.9375rem; color:var(--text-secondary); font-weight:600; line-height:1.4;">"${c.motto}"</div>
+    <button class="btn-outline" style="margin-top:28px; width:100%; font-size:0.8125rem; font-weight:700; border-color:var(--slate-200);" onclick="openProfile(event, ${c.id})">Examine Credentials</button>
+  `;
+  card.onclick = (e) => { if(!e.target.classList.contains('btn-outline')) selectCandidate(c.id, c.category); };
+  return card;
+}
+
+function selectCandidate(id, category){
+  if(!electionSettings.voting_open){alert('Voting is currently closed.');return;}
+  
+  if(category === 'A') {
+    if(selectedA !== null) document.getElementById('cand-'+selectedA)?.classList.remove('selected');
+    selectedA = id;
+  } else {
+    if(selectedB !== null) document.getElementById('cand-'+selectedB)?.classList.remove('selected');
+    selectedB = id;
+  }
+  
+  document.getElementById('cand-'+id).classList.add('selected');
+  
+  const hint = document.getElementById('vote-hint');
+  if(selectedA !== null && selectedB !== null) {
+    hint.textContent = 'Choices locked. Ready to submit.';
+    document.getElementById('btn-vote').classList.add('ready');
+  } else {
+    hint.textContent = (selectedA === null) ? 'Please select from Group A' : 'Please select from Group B';
+    document.getElementById('btn-vote').classList.remove('ready');
+  }
+}
+
+function openProfile(e, id){
+  e.stopPropagation();
+  const c = candidatesData.find(can => can.id === id);
+  const col = colors[c.id % colors.length];
+  const avatarHtml = c.image_url 
+    ? `<img src="${c.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${c.name}">`
+    : initials(c.name);
+  document.getElementById('prof-avatar').innerHTML=avatarHtml;
+  document.getElementById('prof-avatar').style.background=col.bg;
+  document.getElementById('prof-avatar').style.color=col.text;
+  document.getElementById('prof-avatar').style.overflow='hidden';
+  document.getElementById('prof-name').textContent=c.name;
+  document.getElementById('prof-motto').textContent=c.motto;
+  document.getElementById('prof-bio').textContent=c.bio||'No bio available.';
+  showEl('profile-overlay','flex');
+}
+function closeProfile(){hideEl('profile-overlay');}
+
+async function loadVoteCount(){
+  const r=await sb('votes?select=id');
+  if(r.ok&&Array.isArray(r.data))document.getElementById('vote-count-live').textContent=r.data.length;
+}
+
+function showConfirm(){
+  if(selectedA===null || selectedB===null)return;
+  const candA = candidatesData.find(c => c.id === selectedA);
+  const candB = candidatesData.find(c => c.id === selectedB);
+  document.getElementById('confirm-name').innerHTML = `${candA.name} (A) <br>& ${candB.name} (B)`;
+  showEl('confirm-overlay','flex');
+}
+function hideConfirm(){hideEl('confirm-overlay');}
+
+async function submitVote(){
+  const btn=document.getElementById('btn-confirm');
+  if(selectedA===null || selectedB===null)return;
+  btn.disabled=true; 
+  
+  try {
+    // Stage 1: Identity Handshake (Ensure shadow IDs are approved in DB)
+    btn.textContent='Syncing Identity...';
+    const sync = await Promise.all([
+      sb('students', {method:'POST', body:JSON.stringify({student_id: currentUser.sid+'_A', full_name: currentUser.name + ' (A)', email: currentUser.sid+'_A@classvote.local', phone: '00000000000', approved: true, is_admin: false}), headers: {'Prefer': 'resolution=merge-duplicates'}}),
+      sb('students', {method:'POST', body:JSON.stringify({student_id: currentUser.sid+'_B', full_name: currentUser.name + ' (B)', email: currentUser.sid+'_B@classvote.local', phone: '00000000000', approved: true, is_admin: false}), headers: {'Prefer': 'resolution=merge-duplicates'}})
+    ]);
+    
+    // Ignore 409 (Conflict) - it means the identity is already registered
+    const syncErrors = sync.filter(r => !r.ok && r.status !== 409);
+    if(syncErrors.length > 0) {
+      const err = syncErrors[0]?.data?.message || 'Sync failed';
+      throw new Error(`Identity Sync Error: ${err}`);
+    }
+
+    // Stage 2: Ballot Submission
+    btn.textContent='Securing ballot...';
+    const reqs = [
+      sb('votes', {method:'POST', body:JSON.stringify({student_id: currentUser.sid+'_A', candidate_id: selectedA})}),
+      sb('votes', {method:'POST', body:JSON.stringify({student_id: currentUser.sid+'_B', candidate_id: selectedB})})
+    ];
+    
+    const results = await Promise.all(reqs);
+    if(results.some(r => !r.ok)){
+      const err = results.find(r => !r.ok)?.data?.message || 'Unknown database rejection';
+      throw new Error(`Submission Error: ${err}`);
+    }
+    
+    hideConfirm();
+    const candA = candidatesData.find(c => c.id === selectedA);
+    const candB = candidatesData.find(c => c.id === selectedB);
+    document.getElementById('success-msg').textContent = `Success! Your anonymous ballots for ${candA.name} and ${candB.name} have been secured.`;
+    showPage('page-success');
+    celebrate();
+  } catch(e) {
+    hideConfirm();
+    alert(`Critical Error: ${e.message}\n\nPlease refresh or contact the election administrator if this persists.`);
+  } finally {
+    btn.disabled=false;
+    btn.textContent='Confirm vote';
+  }
+}
+
+async function goToResults(){await loadResults();showPage('page-results');}
+
+async function loadResults(){
+  const rc=document.getElementById('results-content');
+  rc.innerHTML=`<div class="analytics-grid">
+    ${Array(3).fill('<div class="stat-elite"><div class="stat-elite-label skeleton" style="width:60px;height:12px;"></div><div class="stat-elite-val skeleton" style="width:40px;height:24px;margin-top:8px;"></div></div>').join('')}
+  </div>
+  <div class="card" style="height:120px; display:flex; align-items:center; justify-content:center; border: 1px dashed var(--slate-200);">
+    <div class="spinner"></div>
+  </div>`;
+  await loadSettings();
+  const locked=document.getElementById('locked-banner');
+  if(!electionSettings.results_released&&!currentUser?.is_admin){
+    locked.style.display='flex';
+    rc.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-secondary);font-size:13px;">Results will appear here once the admin releases them.</div>';
+    return;
+  }
+  locked.style.display='none';
+  const r=await sb('votes?select=student_id,candidate_id');
+  if(!r.ok||!r.data){rc.innerHTML='<p style="padding:1rem;color:var(--text-secondary)">Could not load results.</p>';return;}
+  await loadCandidates();
+  
+  const counts={};
+  const vSet = new Set();
+  r.data.forEach(v=>{
+    counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1;
+    if(v.student_id) vSet.add(v.student_id.split('_')[0]);
+  });
+  const tVotes = Object.values(counts).reduce((a,b)=>a+b,0);
+  const tVoters = vSet.size;
+
+  let html=`<div class="analytics-grid" style="margin-bottom: 3rem;">
+    <div class="stat-elite">
+      <div class="stat-elite-label" style="opacity:0.7;">Total Volume</div>
+      <div class="stat-elite-val" style="font-size: 2.25rem;">${tVotes}</div>
+      <div style="font-size:10px; color:var(--text-secondary); margin-top:4px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Ballots Cast</div>
+    </div>
+    <div class="stat-elite">
+      <div class="stat-elite-label" style="opacity:0.7;">Turnout Rate</div>
+      <div class="stat-elite-val" style="font-size: 2.25rem; color: var(--primary);">${tVoters?Math.round(tVoters/65*100):0}%</div>
+      <div style="font-size:10px; color:var(--text-secondary); margin-top:4px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Verified Participation</div>
+    </div>
+    <div class="stat-elite">
+      <div class="stat-elite-label" style="opacity:0.7;">Voters Active</div>
+      <div class="stat-elite-val" style="font-size: 2.25rem;">${tVoters}</div>
+      <div style="font-size:10px; color:var(--text-secondary); margin-top:4px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Unique Students</div>
+    </div>
+  </div>`;
+
+  html += renderGroupSection('Group A', 'A', counts);
+  html += `<div style="margin-top: 4rem;"></div>`;
+  html += renderGroupSection('Group B', 'B', counts);
+
+  rc.innerHTML=html;
+}
+
+function renderGroupSection(title, category, counts) {
+  const cands = candidatesData.filter(c => c.category === category);
+  const ranked = cands.map(c => ({...c, votes: counts[c.id] || 0})).sort((a,b) => b.votes - a.votes);
+  const totalG = ranked.reduce((a,b) => a + b.votes, 0);
+  const top = ranked[0];
+  
+  let h = `<div class="group-header-results" style="display:flex; align-items:center; gap:12px; margin-bottom: 2rem; border-bottom: 2px solid var(--slate-100); padding-bottom: 12px;">
+    <div style="width:12px; height:24px; background:var(--primary); border-radius:2px;"></div>
+    <h2 style="font-family:var(--font-serif); font-size:1.75rem; color:var(--text-primary); margin:0;">${title}</h2>
+    <span class="badge badge-blue" style="margin-left:auto;">${totalG} Votes</span>
+  </div>`;
+
+  if(top && top.votes > 0) {
+    const col=colors[top.id % colors.length];
+    const winnerImg = top.image_url 
+      ? `<img src="${top.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${top.name}">`
+      : initials(top.name);
+
+    h += `<div class="card winner-card" style="border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 28px; padding: 32px; margin-bottom: 32px; background: linear-gradient(to right, white, var(--slate-50)); border-radius: var(--radius-lg); box-shadow: var(--shadow-elite);">
+      <div style="width:72px;height:72px;border-radius:50%;background:${col.bg};color:${col.text};display:flex;align-items:center;justify-content:center;font-size:1.75rem;font-weight:900;flex-shrink:0;box-shadow: 0 12px 24px rgba(0,0,0,0.1); border: 4px solid white; overflow:hidden;">${winnerImg}</div>
+      <div style="flex: 1;">
+        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--primary);font-weight:800;margin-bottom:6px;">Group Projected Winner</div>
+        <div style="font-size:2rem;font-weight:900;color:var(--text-primary);letter-spacing:-0.03em;line-height:1;">${top.name}</div>
+        <div style="font-size:0.9375rem;color:var(--text-secondary);margin-top:8px;font-weight:600;">Leading at ${totalG ? Math.round(top.votes/totalG*100) : 0}% of group share</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:2.75rem;font-weight:900;color:var(--primary);line-height:0.9; letter-spacing:-0.04em;">${top.votes}</div>
+        <div style="font-size:0.8125rem;color:var(--text-secondary);margin-top:8px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">Ballots</div>
+      </div>
+    </div>`;
+  }
+
+  h += '<div class="bar-list" style="max-width: 1000px;">';
+  ranked.forEach(c => {
+    const cl=colors[c.id % colors.length];
+    const pct = totalG ? Math.round(c.votes / totalG * 100) : 0;
+    h += `<div class="bar-row">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: ${cl.bg}; color: ${cl.text}; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">${initials(c.name)}</div>
+          <span style="font-size: 0.9375rem; font-weight: 600; color: var(--text-main);">${c.name}</span>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 0.9375rem; font-weight: 700; color: var(--primary);">${pct}%</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 4px;">(${c.votes})</span>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width: ${pct}%"></div></div>
+    </div>`;
+  });
+  h += '</div>';
+  return h;
+}
+
+/* ADMIN */
+function switchTab(id){
+  document.querySelectorAll('.admin-tab').forEach((t,i)=>{t.classList.remove('active');});
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs=document.querySelectorAll('.admin-tab');
+  const ids=['tab-students','tab-candidates','tab-votes','tab-settings'];
+  tabs[ids.indexOf(id)].classList.add('active');
+}
+
+async function loadAdminData(){
+  await loadSettings();
+  loadStudentsTable();
+  loadCandidatesAdmin();
+  loadVotesTable();
+  updateSettingsUI();
+}
+
+async function loadStudentsTable(){
+  const r=await sb('students?select=student_id,full_name,email,phone,approved,is_admin&order=created_at.desc');
+  const tbl=document.getElementById('students-table');
+  if(!r.ok||!r.data){tbl.innerHTML='<tr><td colspan="6" style="padding:1rem;color:var(--text-secondary);">Failed to load rosters.</td></tr>';return;}
+  
+  // Clean Roster: Filter out the tactical shadow identities (_A, _B)
+  const cleanData = r.data.filter(s => !s.student_id.endsWith('_A') && !s.student_id.endsWith('_B'));
+  
+  tbl.innerHTML=`<thead><tr><th>Student ID</th><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead><tbody>`+
+    cleanData.map(s=>`<tr>
+      <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);">${s.student_id}</td>
+      <td>
+        <div style="font-weight: 700; color: var(--text-primary);">${s.full_name}</div>
+        ${s.is_admin ? '<span class="badge badge-blue">System Admin</span>' : ''}
+      </td>
+      <td style="color: var(--text-secondary);">${s.email}</td>
+      <td><span class="badge ${s.approved ? 'badge-green' : 'badge-amber'}">${s.approved ? 'Approved' : 'Pending'}</span></td>
+      <td>
+        ${!s.is_admin ? `<button class="btn-sm ${s.approved ? 'btn-outline' : 'btn-blue'}" onclick="toggleApproval('${s.student_id}',${s.approved})">${s.approved ? 'Revoke' : 'Approve'}</button>` : '<span style="color:var(--text-secondary);font-size:11px;">Protected</span>'}
+      </td>
+    </tr>`).join('') + '</tbody>';
+}
+
+async function toggleApproval(sid,current){
+  await sb(`students?student_id=eq.${encodeURIComponent(sid)}`,{method:'PATCH',prefer:'return=representation',body:JSON.stringify({approved:!current})});
+  loadStudentsTable();
+}
+
+async function loadCandidatesAdmin(){
+  await loadCandidates();
+  const tbl=document.getElementById('cand-table');
+  tbl.innerHTML=`<thead><tr><th>Preview</th><th>Candidate Details</th><th>Ballot Settings</th><th style="text-align:right;">Management</th></tr></thead><tbody>`+
+    candidatesData.map(c=>{
+      const col=colors[c.id%colors.length];
+      const avatarHtml = c.image_url 
+        ? `<div class="avatar-sm"><img src="${c.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"></div>`
+        : `<div class="avatar-sm" style="background:${col.bg};color:${col.text};">${initials(c.name)}</div>`;
+      
+      return `<tr>
+        <td style="padding: 24px 20px; vertical-align:top; width: 80px;">
+          <div style="position:relative;">
+            ${avatarHtml}
+            <button class="btn-icon" style="position:absolute; bottom:-6px; right:-6px;" onclick="document.getElementById('file-${c.id}').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </button>
+            <input type="file" id="file-${c.id}" style="display:none;" onchange="uploadCandidatePhoto(${c.id}, this)">
+          </div>
+        </td>
+        <td style="padding: 24px 20px; vertical-align:top;">
+          <div class="field" style="margin-bottom:12px;"><label style="font-size:0.7rem;">Official Name</label><input type="text" id="name-${c.id}" value="${c.name}" placeholder="Full Name" class="input-minimal" style="width:100%; font-weight:900; font-size:1.125rem;"></div>
+          <div class="field" style="margin-bottom:12px;"><label style="font-size:0.7rem;">Motto</label><input type="text" id="motto-${c.id}" value="${c.motto||''}" placeholder="Candidate Motto" class="input-minimal" style="width:100%;"></div>
+          <div class="field"><label style="font-size:0.7rem;">Biography</label><textarea id="bio-${c.id}" placeholder="Full Biography" class="input-minimal" style="width:100%; min-height:80px; resize:vertical; line-height:1.5;">${c.bio||''}</textarea></div>
+        </td>
+        <td style="padding: 24px 20px; vertical-align:top; width: 220px;">
+          <div class="field" style="margin-bottom:20px;">
+            <label style="font-size:0.7rem;">Ballot Group</label>
+            <select id="cat-${c.id}" class="input-minimal" style="width:100%; height:42px; font-weight:800; cursor:pointer;">
+              <option value="A" ${c.category==='A'?'selected':''}>Group A (Standard)</option>
+              <option value="B" ${c.category==='B'?'selected':''}>Group B (Reserve)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label style="font-size:0.7rem;">Image Signature</label>
+            <input type="text" id="img-${c.id}" value="${c.image_url||''}" placeholder="Asset URL" class="input-minimal" style="width:100%; font-size:0.75rem; font-family:var(--font-mono);">
+          </div>
+        </td>
+        <td style="padding: 24px 20px; vertical-align:top; text-align: right; width: 160px;">
+          <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+            <button class="btn-primary" style="width:100%; border-radius: var(--radius-sm); padding:10px; font-size: 0.8125rem;" onclick="saveCandidate(${c.id})">Save Executive</button>
+            <button class="btn-ghost-error" style="width:100%;" onclick="deleteCandidate(${c.id})">Remove Entry</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('') + `
+      <tr style="background: var(--slate-50);">
+        <td colspan="4" style="padding: 40px; text-align: center;">
+          <button class="btn-primary" onclick="showAddCandidate()" style="padding: 14px 40px; background: var(--text-primary); border-radius:var(--radius-lg); font-size:1rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Commission New Candidate
+          </button>
+        </td>
+      </tr>
+    </tbody>`;
+}
+
+function showAddCandidate(){
+  document.getElementById('add-c-name').value = '';
+  document.getElementById('add-c-group').value = 'A';
+  showEl('add-cand-overlay', 'flex');
+}
+
+async function processAddCandidate(){
+  const name = document.getElementById('add-c-name').value.trim();
+  const cat = document.getElementById('add-c-group').value;
+  if(!name) return toast("Identification required.", "error");
+  const r = await sb('candidates', {method:'POST', body:JSON.stringify({name, category: cat})});
+  if(r.ok) {
+    hideEl('add-cand-overlay');
+    toast('Candidate enlisted successfully', 'success');
+    loadCandidatesAdmin();
+  } else {
+    toast('Commission failed: ' + (r.data?.message || r.status), 'error');
+  }
+}
+
+async function deleteCandidate(id){
+  if(!confirm("Are you sure? This will permanently delete the candidate and ALL their votes.")) return;
+  const r = await sb(`candidates?id=eq.${id}`, {method: 'DELETE'});
+  if(r.ok) {
+    toast('Candidate entry dissolved', 'success');
+    loadCandidatesAdmin();
+  } else {
+    toast('Dissolution failed: ' + (r.data?.message || r.status), 'error');
+  }
+}
+
+async function uploadCandidatePhoto(id, input){
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop();
+  const fileName = `cand_${id}_${Date.now()}.${ext}`;
+  const filePath = `candidates/${fileName}`;
+  
+  try {
+    const r = await fetch(`${SB}/storage/v1/object/${filePath}`, {
+      method: 'POST',
+      headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Content-Type': file.type },
+      body: file
+    });
+    if(!r.ok) throw new Error('Upload failed');
+    document.getElementById('img-'+id).value = `${SB}/storage/v1/object/public/${filePath}`;
+    toast('Photo uploaded', 'success');
+  } catch(e) { alert('Upload failed: ' + e.message); }
+}
+
+async function saveCandidate(id){
+  const name=document.getElementById('name-'+id).value.trim();
+  const motto=document.getElementById('motto-'+id).value.trim();
+  const bio=document.getElementById('bio-'+id).value.trim();
+  const image_url=document.getElementById('img-'+id).value.trim();
+  const category=document.getElementById('cat-'+id).value;
+  if(!name) return toast('Name cannot be empty', 'error');
+  
+  const r = await sb(`candidates?id=eq.${id}`,{method:'PATCH',prefer:'return=representation',body:JSON.stringify({name,motto,bio,image_url,category})});
+  if(r.ok) {
+    toast('Candidate identity secured', 'success');
+    loadAdminData();
+  } else {
+    toast('Persistence failed: ' + (r.data?.message || r.status), 'error');
+  }
+}
+
+async function loadVotesTable(){
+  const vr=await sb('votes?select=id,student_id,candidate_id,voted_at&order=voted_at.desc');
+  await loadCandidates();
+  const tbl=document.getElementById('votes-table');
+  if(!vr.ok||!vr.data){tbl.innerHTML='<tr><td colspan="4" style="padding:1.5rem;color:var(--text-secondary);">Failed to load election logs.</td></tr>';return;}
+  
+  tbl.innerHTML=`<thead><tr><th>Timestamp</th><th>Voter ID (Sovereign)</th><th>Selected Candidate</th><th>Category</th></tr></thead><tbody>`+
+    vr.data.map(v=>{
+      const cand = candidatesData.find(c => c.id === v.candidate_id) || {name:'Unknown Candidate'};
+      const isPartA = (v.student_id||'').endsWith('_A');
+      return `<tr>
+        <td style="font-size: 0.75rem; color: var(--text-secondary); padding: 16px;">${new Date(v.voted_at).toLocaleString()}</td>
+        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); padding: 16px;">${v.student_id}</td>
+        <td style="padding: 16px;">
+          <div style="font-weight: 700;">${cand.name}</div>
+        </td>
+        <td style="padding: 16px;">
+          <span class="badge ${isPartA ? 'badge-blue' : 'badge-amber'}">${isPartA ? 'Group A' : 'Group B'}</span>
+        </td>
+      </tr>`;
+    }).join('') + '</tbody>';
+}
+
+function updateSettingsUI(){
+  const br=document.getElementById('btn-release');
+  const bv=document.getElementById('btn-voting');
+  if(br){
+    br.textContent=electionSettings.results_released?'Lock Results':'Release Results';
+    br.className=electionSettings.results_released?'btn-outline':'btn-primary';
+    br.style.width='auto';
+  }
+  if(bv){
+    const isOpen = electionSettings.voting_open;
+    bv.textContent = isOpen ? 'Close Voting' : 'Open Voting';
+    bv.style.background = isOpen ? 'var(--accent-error)' : 'var(--accent-success)';
+    bv.style.color = 'white';
+    bv.style.width = 'auto';
+    bv.style.boxShadow = isOpen ? '0 10px 20px -5px var(--accent-error-soft)' : '0 10px 20px -5px var(--accent-success-soft)';
+  }
+  const dl=document.getElementById('current-deadline');
+  if(dl&&electionSettings.deadline)dl.textContent='Current: '+new Date(electionSettings.deadline).toLocaleString();
+}
+
+async function toggleResults(){
+  const newVal=!electionSettings.results_released;
+  await sb('election_settings?id=eq.1',{method:'PATCH',prefer:'return=representation',body:JSON.stringify({results_released:newVal})});
+  electionSettings.results_released=newVal;
+  updateSettingsUI();
+  showSucc('settings-succ',newVal?'Results released to students!':'Results locked.');
+}
+
+async function toggleVoting(){
+  const newVal=!electionSettings.voting_open;
+  await sb('election_settings?id=eq.1',{method:'PATCH',prefer:'return=representation',body:JSON.stringify({voting_open:newVal})});
+  electionSettings.voting_open=newVal;
+  updateSettingsUI();
+  updateHeaderBadge();
+  showSucc('settings-succ',newVal?'Voting is now open.':'Voting is now closed.');
+}
+
+async function saveDeadline(){
+  const val=document.getElementById('deadline-input').value;
+  if(!val){showErr('settings-err','Please pick a date and time.');return;}
+  await sb('election_settings?id=eq.1',{method:'PATCH',prefer:'return=representation',body:JSON.stringify({deadline:new Date(val).toISOString()})});
+  electionSettings.deadline=new Date(val).toISOString();
+  updateSettingsUI();
+  showSucc('settings-succ','Deadline saved!');
+}
+
+async function exportResults(){
+  toast('Generating election ledger...', 'info');
+  const vr = await sb('votes?select=student_id,candidate_id,voted_at');
+  if(!vr.ok || !vr.data) return toast('Failed to fetch ledger.', 'error');
+  await loadCandidates();
+  
+  let csv = "Timestamp,Voter ID,Category,Candidate Selection\n";
+  vr.data.forEach(v => {
+    const cand = candidatesData.find(c => c.id === v.candidate_id) || {name: 'Unknown', category: '?'};
+    csv += `${new Date(v.voted_at).toLocaleString()},${v.student_id},Group ${cand.category},${cand.name.replace(/,/g, '')}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `IPE_VOTE_RESULTS_${Date.now()}.csv`);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast('Ledger exported successfully.', 'success');
+}
+
+async function resetElection(){
+  const confirmed = confirm("⚠️ SOVEREIGN PURGE: Are you absolutely certain? This will delete ALL votes and reset everyone's voting eligibility. This action is irreversible.");
+  if(!confirmed) return;
+
+  toast('Initiating deep purge...', 'info');
+  
+  // 1. Delete all votes
+  const dr = await sb('votes?id=neq.00000000-0000-0000-0000-000000000000', {method:'DELETE'});
+  
+  // 2. Delete shadow students (_A and _B)
+  const dsa = await sb('students?student_id=like.*_A', {method:'DELETE'});
+  const dsb = await sb('students?student_id=like.*_B', {method:'DELETE'});
+
+  toast('Election ledger cleared. System reset.', 'success');
+  loadAdminData();
+}
+
+function logout(){
+  localStorage.removeItem('cv_user');
+  currentUser=null;
+  selectedA=null;
+  selectedB=null;
+  isRegMode=false;
+  candidatesData=[];
+  hideEl('user-chip');
+  hideEl('user-chip-dash');
+  ['login-id','login-email','reg-name','reg-email','reg-phone','reg-id'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('register-fields').style.display='none';
+  document.getElementById('login-fields').style.display='block';
+  document.getElementById('auth-title').textContent='Sign in to vote';
+  document.getElementById('auth-sub').textContent='Use your student credentials to access the ballot';
+  document.getElementById('auth-btn').textContent='Sign In';
+  document.getElementById('toggle-mode').textContent="Don't have an account? Register";
+  hideEl('auth-err');hideEl('auth-succ');
+  showPage('page-login');
+}
+
+// ==========================================
+// GLOBAL INITIALIZATION (Persistence Engine)
+// ==========================================
+window.addEventListener('DOMContentLoaded', async () => {
+  // 1. Initial Data Load
+  loadVoteCount();
+  
+  // 2. Session Recovery
+  const saved = localStorage.getItem('cv_user');
+  if(saved){
+    try {
+      currentUser = JSON.parse(saved);
+      console.log('Sovereign Session Restored:', currentUser.sid);
+      await afterLogin();
+    } catch(e) { 
+      console.warn('Session Corrupt. Purging.');
+      localStorage.removeItem('cv_user'); 
+    }
+  }
+});
+</script>
